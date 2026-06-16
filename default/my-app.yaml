@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  namespace: default
+  labels:
+    app: my-app
+    managed-by: portainer-run
+  annotations:
+    portainer-run/git-target-id: 14ee8904-8264-4cf2-9362-653f397a2009
+    portainer-run/git-branch: main
+    portainer-run/git-path: default/my-app.yaml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+        managed-by: portainer-run
+    spec:
+      containers:
+        - name: app
+          image: nginx
+          imagePullPolicy: Always
