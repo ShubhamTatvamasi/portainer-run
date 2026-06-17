@@ -7,7 +7,7 @@ metadata:
     app: your-app
     managed-by: portainer-run
   annotations:
-    portainer-run/git-target-id: 14ee8904-8264-4cf2-9362-653f397a2009
+    portainer-run/git-target-id: 0daa0b9b-70fd-4de8-9c8f-7dc69ab79b1e
     portainer-run/git-branch: main
     portainer-run/git-path: default/your-app.yaml
 spec:
