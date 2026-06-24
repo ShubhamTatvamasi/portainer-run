@@ -25,7 +25,9 @@ config:
   # URL of the Portainer instance Portainer-Run connects to.
   # When Portainer-Run runs in the same cluster as Portainer, use the in-cluster
   # service DNS, e.g. https://portainer.portainer.svc.cluster.local:9443
-  PORTAINER_URL: "https://portainer.example.com:9443"
+  # When Portainer-Run runs outside the cluster, use the external URL of Portainer, e.g.
+  # https://portainer.example.com:9443
+  PORTAINER_URL: "https://portainer.portainer.svc.cluster.local:9443"
 
   # Feature flags (all optional). Set to "true"/"false" as needed.
   FEATURE_VIBE_DEPLOY: "true"
