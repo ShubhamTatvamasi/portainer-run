@@ -150,14 +150,6 @@ readinessProbe:
   initialDelaySeconds: 10
   periodSeconds: 10
 
-podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
-  fsGroup: 1000
+podSecurityContext: {}
 
-securityContext:
-  allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: false
-  capabilities:
-    drop:
-      - ALL
+securityContext: {}
