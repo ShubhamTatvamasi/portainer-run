@@ -1,0 +1,40 @@
+Portainer-Run has been deployed.
+
+{{- if .Values.ingress.enabled }}
+
+Access it at:
+{{- range $host := .Values.ingress.hosts }}
+  {{- range $host.paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if eq .Values.service.type "ClusterIP" }}
+
+The service is exposed internally as ClusterIP. To reach it locally, run:
+
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} \
+    -l "app.kubernetes.io/name={{ include "portainer-run.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" \
+    -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8443:443
+
+  Then open https://127.0.0.1:8443
+{{- else if eq .Values.service.type "NodePort" }}
+
+Get the application URL by running:
+
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "portainer-run.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo https://$NODE_IP:$NODE_PORT
+{{- else if eq .Values.service.type "LoadBalancer" }}
+
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "portainer-run.fullname" . }} -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+  echo https://$SERVICE_IP:{{ .Values.service.httpsPort }}
+{{- end }}
+
+{{- if and .Values.secret.create (not .Values.secret.existingSecret) (not .Values.secret.encryptionKey) }}
+
+WARNING: secret.encryptionKey is empty. Set it (openssl rand -hex 32) or provide
+an existing Secret via secret.existingSecret before relying on this deployment.
+{{- end }}
