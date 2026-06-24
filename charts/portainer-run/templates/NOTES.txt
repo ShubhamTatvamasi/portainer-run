@@ -33,8 +33,10 @@ Get the application URL by running:
   echo https://$SERVICE_IP:{{ .Values.service.httpsPort }}
 {{- end }}
 
-{{- if and .Values.secret.create (not .Values.secret.existingSecret) (not .Values.secret.encryptionKey) }}
+{{- if and (not .Values.secret.existingSecret) (not .Values.secret.encryptionKey) }}
 
-WARNING: secret.encryptionKey is empty. Set it (openssl rand -hex 32) or provide
-an existing Secret via secret.existingSecret before relying on this deployment.
+NOTE: secret.encryptionKey was not set — an encryption key has been auto-generated
+and stored in the Secret. Back it up before upgrading:
+  kubectl get secret -n {{ .Release.Namespace }} {{ include "portainer-run.secretName" . }} \
+    -o jsonpath='{.data.ENCRYPTION_KEY}' | base64 -d
 {{- end }}
