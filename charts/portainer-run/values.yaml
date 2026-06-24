@@ -1,0 +1,133 @@
+# Default values for portainer-run.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: portainer/portainer-run
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+podAnnotations: {}
+podLabels: {}
+
+# Non-sensitive configuration rendered into a ConfigMap and mounted via envFrom.
+# See https://github.com/portainer/portainer-run for the full list of options.
+config:
+  # URL of the Portainer instance Portainer-Run connects to.
+  # When Portainer-Run runs in the same cluster as Portainer, use the in-cluster
+  # service DNS, e.g. https://portainer.portainer.svc.cluster.local:9443
+  PORTAINER_URL: "https://portainer.example.com:9443"
+
+  # Feature flags (all optional). Set to "true"/"false" as needed.
+  FEATURE_VIBE_DEPLOY: "true"
+  FEATURE_SIMPLE_DEPLOY: "false"
+  FEATURE_MANIFEST_BUILDER: "false"
+  FEATURE_CATALOGUE: "false"
+  FEATURE_SECRETS: "false"
+  # TEMPLATE_URL: "https://your-server.com/templates.json"
+  # BASE_DOMAIN: "apps.example.com"
+  # OPENAI_MODEL: "gpt-4o"
+  # CACHE_DIR: "/app/data"
+
+# Sensitive values.
+# By default a Secret is created from the values below. To use a pre-existing
+# Secret instead, set secret.existingSecret to its name and leave create=false.
+# The Secret must provide the keys: ENCRYPTION_KEY and (optionally) ANTHROPIC_API_KEY.
+secret:
+  create: true
+  existingSecret: ""
+  # Encrypts stored Git target credentials at rest. Minimum 32 chars.
+  # Generate with: openssl rand -hex 32
+  # Leave empty to auto-generate a key on first install. The generated key is
+  # preserved across upgrades (read back from the existing Secret) so it never
+  # rotates — rotating it would make the existing database unreadable.
+  encryptionKey: ""
+  # Anthropic (Claude) API key. Optional; auto-detected when set.
+  anthropicApiKey: ""
+  # OpenAI API key. Optional alternative to Anthropic.
+  openaiApiKey: ""
+
+service:
+  type: ClusterIP
+  httpsPort: 443
+  httpPort: 80
+  annotations: {}
+
+ingress:
+  enabled: false
+  ingressClassName: ""
+  annotations: {}
+    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  # Hosts and paths are of type array.
+  hosts:
+    - host: portainer-run.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+    # - secretName: portainer-run-tls
+    #   hosts:
+    #     - portainer-run.example.com
+
+persistence:
+  enabled: true
+  size: 1Gi
+  accessMode: ReadWriteOnce
+  storageClass: ""
+  existingClaim: ""
+  annotations: {}
+  # Directory the cache volume is mounted at inside the container.
+  mountPath: /app/data
+
+# Optional DNS configuration for the pod. Enable when the pod cannot resolve
+# the Portainer hostname (e.g. lower the ndots value for short cluster names).
+dnsConfig:
+  enabled: false
+  ndots: "1"
+  nameservers: []
+  searches: []
+  # Extra raw dnsConfig.options appended after ndots.
+  options: []
+
+# Extra environment variables to set on the portainer-run container.
+# Supports plain values and valueFrom references.
+extraEnv: []
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /config
+    port: https
+    scheme: HTTPS
+  initialDelaySeconds: 15
+  periodSeconds: 30
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /config
+    port: https
+    scheme: HTTPS
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+podSecurityContext: {}
+securityContext: {}
