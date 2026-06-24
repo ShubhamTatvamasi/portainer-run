@@ -79,7 +79,6 @@ service:
   # (these must be on the Service object, not the Ingress):
   #
   # Traefik (also requires a ServersTransport CRD with insecureSkipVerify: true):
-  #   traefik.ingress.kubernetes.io/service.serversscheme: "https"
   #   traefik.ingress.kubernetes.io/service.serverstransport: "<namespace>-<name>@kubernetescrd"
   #
   # nginx:
