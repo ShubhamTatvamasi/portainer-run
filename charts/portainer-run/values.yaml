@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: portainerci/portainer-run
+  repository: portainer/portainer-run
   tag: latest
   pullPolicy: Always
 
