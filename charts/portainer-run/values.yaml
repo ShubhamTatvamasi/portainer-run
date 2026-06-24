@@ -58,6 +58,19 @@ secret:
   # OpenAI API key. Optional alternative to Anthropic.
   openaiApiKey: ""
 
+# TLS certificate served by the pod on port 443.
+# By default Portainer-Run generates a self-signed cert at startup. To serve a
+# real/trusted cert instead, point existingSecret at a kubernetes.io/tls Secret
+# (the same one you use at the ingress). The cert is mounted into the pod and
+# Portainer-Run is pointed at it via SSL_CERT / SSL_KEY / SSL_CERT_DIR.
+# This also lets the ingress controller talk HTTPS to the backend without
+# having to skip certificate verification.
+tls:
+  existingSecret: ""
+  mountPath: /certs
+  certKey: tls.crt
+  keyKey: tls.key
+
 service:
   type: ClusterIP
   httpsPort: 443
@@ -68,14 +81,18 @@ ingress:
   enabled: false
   ingressClassName: ""
   # Service port the Ingress backend routes to. Defaults to service.httpsPort
-  # (443, end-to-end TLS). Set to service.httpPort (80) when TLS is terminated
-  # at the ingress controller and you want a plain-HTTP hop to the pod —
-  # avoids the controller having to trust the pod's self-signed cert.
+  # (443). Portainer-Run only serves real content over HTTPS — port 80 just
+  # redirects to 443 — so the backend must target 443. The controller therefore
+  # needs to speak HTTPS to the backend (see annotations below).
   servicePort: ""
   annotations: {}
-    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Tell the controller the backend speaks HTTPS:
+    # Traefik:
+    #   traefik.ingress.kubernetes.io/service.serversscheme: "https"
+    # nginx:
+    #   nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    # cert-manager (edge cert):
+    #   cert-manager.io/cluster-issuer: "letsencrypt-prod"
   # Hosts and paths are of type array.
   hosts:
     - host: portainer-run.example.com
