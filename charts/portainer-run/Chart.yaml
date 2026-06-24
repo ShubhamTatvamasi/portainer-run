@@ -4,7 +4,7 @@ description: Helm chart used to deploy Portainer-Run on Kubernetes
 home: https://www.portainer.io
 icon: https://github.com/portainer/portainer/raw/develop/app/assets/ico/apple-touch-icon.png
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "latest"
 maintainers:
   - name: Portainer

@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: portainer/portainer-run
+  repository: portainerci/portainer-run
   tag: latest
   pullPolicy: Always
 
@@ -65,6 +65,11 @@ service:
 ingress:
   enabled: false
   ingressClassName: ""
+  # Service port the Ingress backend routes to. Defaults to service.httpsPort
+  # (443, end-to-end TLS). Set to service.httpPort (80) when TLS is terminated
+  # at the ingress controller and you want a plain-HTTP hop to the pod —
+  # avoids the controller having to trust the pod's self-signed cert.
+  servicePort: ""
   annotations: {}
     # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
@@ -90,8 +95,9 @@ persistence:
   # Directory the cache volume is mounted at inside the container.
   mountPath: /app/data
 
-# Optional DNS configuration for the pod. Enable when the pod cannot resolve
-# the Portainer hostname (e.g. lower the ndots value for short cluster names).
+# Optional DNS configuration for the pod. Enabled by default with ndots=1 so
+# short in-cluster service names (e.g. portainer.portainer.svc.cluster.local)
+# resolve without excessive search-domain expansion. Disable if not needed.
 dnsConfig:
   enabled: false
   ndots: "1"
