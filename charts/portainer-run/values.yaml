@@ -2,11 +2,16 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Scaling beyond 1 is not recommended — the PVC uses ReadWriteOnce which only
+# allows one pod at a time. Use ReadWriteMany storage and set
+# persistence.accessMode: ReadWriteMany before increasing replicas.
 replicaCount: 1
 
 image:
   repository: portainer/portainer-run
   tag: latest
+  # Always is recommended for floating tags (latest, develop). Switch to
+  # IfNotPresent if you pin to a specific immutable tag in production.
   pullPolicy: Always
 
 imagePullSecrets: []
@@ -23,13 +28,11 @@ podLabels: {}
 # See https://github.com/portainer/portainer-run for the full list of options.
 config:
   # URL of the Portainer instance Portainer-Run connects to.
-  # When Portainer-Run runs in the same cluster as Portainer, use the in-cluster
-  # service DNS, e.g. https://portainer.portainer.svc.cluster.local:9443
-  # When Portainer-Run runs outside the cluster, use the external URL of Portainer, e.g.
-  # https://portainer.example.com:9443
+  # In-cluster:  https://portainer.portainer.svc.cluster.local:9443
+  # External:    https://portainer.example.com:9443
   PORTAINER_URL: "https://portainer.portainer.svc.cluster.local:9443"
 
-  # Feature flags (all optional). Set to "true"/"false" as needed.
+  # Feature flags — set to "true"/"false" as needed.
   FEATURE_VIBE_DEPLOY: "true"
   FEATURE_SIMPLE_DEPLOY: "false"
   FEATURE_MANIFEST_BUILDER: "false"
@@ -41,17 +44,15 @@ config:
   # CACHE_DIR: "/app/data"
 
 # Sensitive values.
-# By default a Secret is created from the values below. To use a pre-existing
-# Secret instead, set secret.existingSecret to its name and leave create=false.
-# The Secret must provide the keys: ENCRYPTION_KEY and (optionally) ANTHROPIC_API_KEY.
+# To use a pre-existing Secret instead of creating one, set existingSecret to
+# its name. The Secret must provide: ENCRYPTION_KEY and optionally
+# ANTHROPIC_API_KEY / OPENAI_API_KEY.
 secret:
-  create: true
   existingSecret: ""
-  # Encrypts stored Git target credentials at rest. Minimum 32 chars.
-  # Generate with: openssl rand -hex 32
-  # Leave empty to auto-generate a key on first install. The generated key is
-  # preserved across upgrades (read back from the existing Secret) so it never
-  # rotates — rotating it would make the existing database unreadable.
+  # Encrypts stored Git credentials at rest. Minimum 32 chars.
+  # Leave empty to auto-generate on first install (key is preserved across
+  # upgrades and never rotated — rotating it makes the database unreadable).
+  # Generate manually with: openssl rand -hex 32
   encryptionKey: ""
   # Anthropic (Claude) API key. Optional; auto-detected when set.
   anthropicApiKey: ""
@@ -60,11 +61,9 @@ secret:
 
 # TLS certificate served by the pod on port 443.
 # By default Portainer-Run generates a self-signed cert at startup. To serve a
-# real/trusted cert instead, point existingSecret at a kubernetes.io/tls Secret
-# (the same one you use at the ingress). The cert is mounted into the pod and
-# Portainer-Run is pointed at it via SSL_CERT / SSL_KEY / SSL_CERT_DIR.
-# This also lets the ingress controller talk HTTPS to the backend without
-# having to skip certificate verification.
+# real/trusted cert instead, point existingSecret at a kubernetes.io/tls Secret.
+# The cert is mounted into the pod and Portainer-Run is pointed at it via
+# SSL_CERT / SSL_KEY / SSL_CERT_DIR env vars.
 tls:
   existingSecret: ""
   mountPath: /certs
@@ -75,34 +74,32 @@ service:
   type: ClusterIP
   httpsPort: 443
   httpPort: 80
+  # The backend only serves HTTPS (port 80 redirects to 443). Tell your ingress
+  # controller to connect to the backend over HTTPS via service annotations
+  # (these must be on the Service object, not the Ingress):
+  #
+  # Traefik (also requires a ServersTransport CRD with insecureSkipVerify: true):
+  #   traefik.ingress.kubernetes.io/service.serversscheme: "https"
+  #   traefik.ingress.kubernetes.io/service.serverstransport: "<namespace>-<name>@kubernetescrd"
+  #
+  # nginx:
+  #   nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
   annotations: {}
 
 ingress:
   enabled: false
   ingressClassName: ""
-  # Service port the Ingress backend routes to. Defaults to service.httpsPort
-  # (443). Portainer-Run only serves real content over HTTPS — port 80 just
-  # redirects to 443 — so the backend must target 443. The controller therefore
-  # needs to speak HTTPS to the backend (see annotations below).
-  servicePort: ""
   annotations: {}
-    # Tell the controller the backend speaks HTTPS:
-    # Traefik:
-    #   traefik.ingress.kubernetes.io/service.serversscheme: "https"
-    # nginx:
-    #   nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    # cert-manager (edge cert):
-    #   cert-manager.io/cluster-issuer: "letsencrypt-prod"
   # Hosts and paths are of type array.
   hosts:
-    - host: portainer-run.example.com
+    - host: portainer-run.chart-example.local
       paths:
         - path: /
           pathType: Prefix
   tls: []
     # - secretName: portainer-run-tls
     #   hosts:
-    #     - portainer-run.example.com
+    #     - portainer-run.chart-example.local
 
 persistence:
   enabled: true
@@ -111,22 +108,21 @@ persistence:
   storageClass: ""
   existingClaim: ""
   annotations: {}
-  # Directory the cache volume is mounted at inside the container.
   mountPath: /app/data
 
-# Optional DNS configuration for the pod. Enabled by default with ndots=1 so
-# short in-cluster service names (e.g. portainer.portainer.svc.cluster.local)
-# resolve without excessive search-domain expansion. Disable if not needed.
+# DNS configuration for the pod. Enabled by default with ndots=1 to reduce
+# unnecessary DNS search-domain expansion when resolving in-cluster hostnames
+# (e.g. portainer.portainer.svc.cluster.local). Set enabled: false if your
+# cluster DNS is already tuned or you are not using in-cluster Portainer URLs.
 dnsConfig:
-  enabled: false
+  enabled: true
   ndots: "1"
   nameservers: []
   searches: []
-  # Extra raw dnsConfig.options appended after ndots.
   options: []
 
-# Extra environment variables to set on the portainer-run container.
-# Supports plain values and valueFrom references.
+# Extra environment variables for the container.
+# Supports plain values and valueFrom references (secretKeyRef, configMapKeyRef).
 extraEnv: []
 
 resources:
@@ -154,5 +150,14 @@ readinessProbe:
   initialDelaySeconds: 10
   periodSeconds: 10
 
-podSecurityContext: {}
-securityContext: {}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
