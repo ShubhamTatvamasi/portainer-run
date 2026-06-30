@@ -3,6 +3,23 @@ entries:
   portainer-run:
   - apiVersion: v2
     appVersion: latest
+    created: "2026-06-30T08:24:43.035153365Z"
+    description: Helm chart used to deploy Portainer-Run on Kubernetes
+    digest: 2b455db0bf2b012eb4f4134e849f914c78063b5f81f169b7badd7c6db8834516
+    home: https://portainer.ai
+    icon: https://github.com/portainer/portainer/raw/develop/app/assets/ico/apple-touch-icon.png
+    maintainers:
+    - name: Portainer
+      url: https://www.portainer.io
+    name: portainer-run
+    sources:
+    - https://github.com/portainer/portainer-run
+    type: application
+    urls:
+    - https://github.com/ShubhamTatvamasi/portainer-run/releases/download/portainer-run-0.2.14/portainer-run-0.2.14.tgz
+    version: 0.2.14
+  - apiVersion: v2
+    appVersion: latest
     created: "2026-06-30T07:43:38.238914246Z"
     description: Helm chart used to deploy Portainer-Run on Kubernetes
     digest: 1cc9ad964e789f96be70ceed20f75259ccbbce90e879b8294167f560a2b28ab7
@@ -256,4 +273,4 @@ entries:
     urls:
     - https://github.com/ShubhamTatvamasi/portainer-run/releases/download/portainer-run-0.1.0/portainer-run-0.1.0.tgz
     version: 0.1.0
-generated: "2026-06-30T07:43:38.239044742Z"
+generated: "2026-06-30T08:24:43.035254083Z"
