@@ -1,6 +1,6 @@
 # portainer-run
 
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/portainer-run)](https://artifacthub.io/packages/search?repo=portainer-run)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/portainer-run)](https://artifacthub.io/packages/helm/portainer-run/portainer-run)
 
 ```bash
 kubectl rollout restart deployment/portainer-run -n portainer-run
