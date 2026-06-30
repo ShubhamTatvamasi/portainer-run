@@ -30,7 +30,7 @@ jobs:
           echo "${{ secrets.GPG_KEY_PASSPHRASE }}" > /tmp/gpg-passphrase
 
       - name: Install chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
+        uses: helm/chart-releaser-action@v1.7.0
         with:
           install_only: true
 
@@ -43,9 +43,10 @@ jobs:
             --passphrase-file /tmp/gpg-passphrase
 
       - name: Release charts
-        uses: helm/chart-releaser-action@v1.6.0
+        uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
           config: .cr.yaml
           skip_packaging: true
+          mark_as_latest: false
