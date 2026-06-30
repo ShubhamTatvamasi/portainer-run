@@ -21,7 +21,18 @@ jobs:
           git config user.name "Shubham Tatvamasi"
           git config user.email "shubhamtatvamasi@gmail.com"
 
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.GPG_KEY_B64 }}" | base64 -d | gpg --batch --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --import
+          gpg --list-secret-keys
+          # helm package --sign requires the legacy secring format
+          gpg --batch --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --export-secret-keys > ~/.gnupg/secring.gpg
+          # write passphrase file for cr
+          echo "${{ secrets.GPG_KEY_PASSPHRASE }}" > /tmp/gpg-passphrase
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          config: .cr.yaml

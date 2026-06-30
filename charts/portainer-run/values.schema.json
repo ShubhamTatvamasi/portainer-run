@@ -1,0 +1,399 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Portainer-Run Helm Chart Values",
+  "type": "object",
+  "properties": {
+    "replicaCount": {
+      "type": "integer",
+      "description": "Number of replicas. Keep at 1 unless using ReadWriteMany storage.",
+      "minimum": 1,
+      "default": 1
+    },
+    "image": {
+      "type": "object",
+      "description": "Container image configuration.",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "description": "Container image repository.",
+          "default": "portainer/portainer-run"
+        },
+        "tag": {
+          "type": "string",
+          "description": "Image tag.",
+          "default": "latest"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "description": "Image pull policy.",
+          "enum": ["Always", "IfNotPresent", "Never"],
+          "default": "Always"
+        }
+      },
+      "additionalProperties": false
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "description": "Pull secrets for private registries.",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the chart name.",
+      "default": ""
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "Override the full release name.",
+      "default": ""
+    },
+    "nodeSelector": {
+      "type": "object",
+      "description": "Node selector labels.",
+      "default": {}
+    },
+    "tolerations": {
+      "type": "array",
+      "description": "Pod tolerations.",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "affinity": {
+      "type": "object",
+      "description": "Pod affinity/anti-affinity rules.",
+      "default": {}
+    },
+    "podAnnotations": {
+      "type": "object",
+      "description": "Annotations to add to the pod.",
+      "default": {}
+    },
+    "podLabels": {
+      "type": "object",
+      "description": "Extra labels to add to the pod.",
+      "default": {}
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "description": "Pod-level security context.",
+      "default": {}
+    },
+    "securityContext": {
+      "type": "object",
+      "description": "Container-level security context.",
+      "default": {}
+    },
+    "config": {
+      "type": "object",
+      "description": "Non-sensitive configuration rendered into a ConfigMap and mounted via envFrom.",
+      "properties": {
+        "PORTAINER_URL": {
+          "type": "string",
+          "description": "URL of the Portainer instance Portainer-Run connects to.",
+          "default": "https://portainer.portainer.svc.cluster.local:9443"
+        },
+        "FEATURE_VIBE_DEPLOY": {
+          "type": "string",
+          "description": "Enable the Vibe Deploy feature.",
+          "enum": ["true", "false"],
+          "default": "true"
+        },
+        "FEATURE_SIMPLE_DEPLOY": {
+          "type": "string",
+          "description": "Enable the Simple Deploy feature.",
+          "enum": ["true", "false"],
+          "default": "false"
+        },
+        "FEATURE_MANIFEST_BUILDER": {
+          "type": "string",
+          "description": "Enable the Manifest Builder feature.",
+          "enum": ["true", "false"],
+          "default": "false"
+        },
+        "FEATURE_CATALOGUE": {
+          "type": "string",
+          "description": "Enable the Catalogue feature.",
+          "enum": ["true", "false"],
+          "default": "false"
+        },
+        "FEATURE_SECRETS": {
+          "type": "string",
+          "description": "Enable the Secrets feature.",
+          "enum": ["true", "false"],
+          "default": "false"
+        },
+        "TEMPLATE_URL": {
+          "type": "string",
+          "description": "URL of a custom template JSON file."
+        },
+        "BASE_DOMAIN": {
+          "type": "string",
+          "description": "Base domain for generated app URLs."
+        },
+        "OPENAI_MODEL": {
+          "type": "string",
+          "description": "OpenAI model to use (e.g. gpt-4o)."
+        },
+        "CACHE_DIR": {
+          "type": "string",
+          "description": "Directory for caching data inside the container."
+        }
+      },
+      "additionalProperties": false
+    },
+    "secret": {
+      "type": "object",
+      "description": "Sensitive values. Set existingSecret to use a pre-existing Secret.",
+      "properties": {
+        "existingSecret": {
+          "type": "string",
+          "description": "Name of a pre-existing Secret to use instead of creating one.",
+          "default": ""
+        },
+        "encryptionKey": {
+          "type": "string",
+          "description": "Key used to encrypt stored Git credentials at rest (minimum 32 chars). Auto-generated if empty.",
+          "default": ""
+        },
+        "anthropicApiKey": {
+          "type": "string",
+          "description": "Anthropic (Claude) API key.",
+          "default": ""
+        },
+        "openaiApiKey": {
+          "type": "string",
+          "description": "OpenAI API key.",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tls": {
+      "type": "object",
+      "description": "TLS certificate configuration. By default a self-signed cert is generated at startup.",
+      "properties": {
+        "existingSecret": {
+          "type": "string",
+          "description": "Name of a kubernetes.io/tls Secret containing a trusted certificate.",
+          "default": ""
+        },
+        "mountPath": {
+          "type": "string",
+          "description": "Mount path for the TLS secret inside the container.",
+          "default": "/certs"
+        },
+        "certKey": {
+          "type": "string",
+          "description": "Key in the Secret that holds the certificate.",
+          "default": "tls.crt"
+        },
+        "keyKey": {
+          "type": "string",
+          "description": "Key in the Secret that holds the private key.",
+          "default": "tls.key"
+        }
+      },
+      "additionalProperties": false
+    },
+    "service": {
+      "type": "object",
+      "description": "Kubernetes Service configuration.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Service type.",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"],
+          "default": "ClusterIP"
+        },
+        "httpsPort": {
+          "type": "integer",
+          "description": "HTTPS port exposed by the Service.",
+          "default": 443
+        },
+        "httpPort": {
+          "type": "integer",
+          "description": "HTTP port exposed by the Service (redirects to HTTPS).",
+          "default": 80
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Annotations to add to the Service.",
+          "default": {}
+        }
+      },
+      "additionalProperties": false
+    },
+    "ingress": {
+      "type": "object",
+      "description": "Ingress configuration.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Create an Ingress resource.",
+          "default": false
+        },
+        "ingressClassName": {
+          "type": "string",
+          "description": "Ingress class name (e.g. nginx, traefik).",
+          "default": ""
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Annotations to add to the Ingress.",
+          "default": {}
+        },
+        "hosts": {
+          "type": "array",
+          "description": "Ingress host rules.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string"
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": { "type": "string" },
+                    "pathType": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tls": {
+          "type": "array",
+          "description": "TLS configuration for the Ingress.",
+          "items": {
+            "type": "object"
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "persistence": {
+      "type": "object",
+      "description": "Persistent storage configuration.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable data persistence via a PVC.",
+          "default": true
+        },
+        "size": {
+          "type": "string",
+          "description": "PVC size.",
+          "default": "1Gi"
+        },
+        "accessMode": {
+          "type": "string",
+          "description": "PVC access mode.",
+          "enum": ["ReadWriteOnce", "ReadWriteMany", "ReadOnlyMany"],
+          "default": "ReadWriteOnce"
+        },
+        "storageClass": {
+          "type": "string",
+          "description": "StorageClass for the PVC. Empty string uses the cluster default.",
+          "default": ""
+        },
+        "existingClaim": {
+          "type": "string",
+          "description": "Name of a pre-existing PVC to use.",
+          "default": ""
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Annotations to add to the PVC.",
+          "default": {}
+        },
+        "mountPath": {
+          "type": "string",
+          "description": "Mount path inside the container.",
+          "default": "/app/data"
+        }
+      },
+      "additionalProperties": false
+    },
+    "dnsConfig": {
+      "type": "object",
+      "description": "Pod DNS configuration.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Inject a custom dnsConfig into the pod.",
+          "default": true
+        },
+        "ndots": {
+          "type": "string",
+          "description": "ndots value to reduce unnecessary DNS search expansion.",
+          "default": "1"
+        },
+        "nameservers": {
+          "type": "array",
+          "description": "Additional nameservers.",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "searches": {
+          "type": "array",
+          "description": "Additional search domains.",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "options": {
+          "type": "array",
+          "description": "Additional DNS options.",
+          "items": { "type": "object" },
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "extraEnv": {
+      "type": "array",
+      "description": "Extra environment variables for the container. Supports value and valueFrom forms.",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "resources": {
+      "type": "object",
+      "description": "Container resource requests and limits.",
+      "properties": {
+        "requests": {
+          "type": "object",
+          "properties": {
+            "cpu": { "type": "string" },
+            "memory": { "type": "string" }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "cpu": { "type": "string" },
+            "memory": { "type": "string" }
+          }
+        }
+      }
+    },
+    "livenessProbe": {
+      "type": "object",
+      "description": "Liveness probe configuration."
+    },
+    "readinessProbe": {
+      "type": "object",
+      "description": "Readiness probe configuration."
+    }
+  },
+  "additionalProperties": false
+}
