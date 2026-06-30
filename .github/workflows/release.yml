@@ -36,7 +36,11 @@ jobs:
 
       - name: Package charts with signing
         run: |
-          cr package charts/portainer-run --config .cr.yaml
+          cr package charts/portainer-run \
+            --sign \
+            --key "Shubham Tatvamasi" \
+            --keyring ~/.gnupg/secring.gpg \
+            --passphrase-file /tmp/gpg-passphrase
 
       - name: Release charts
         uses: helm/chart-releaser-action@v1.7.0
