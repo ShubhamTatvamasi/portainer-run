@@ -1,3 +1,4 @@
 sign: true
 key: "Shubham Tatvamasi"
 keyring: ~/.gnupg/secring.gpg
+passphrase-file: /tmp/gpg-passphrase

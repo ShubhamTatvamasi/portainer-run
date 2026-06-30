@@ -23,10 +23,11 @@ jobs:
 
       - name: Import GPG key
         run: |
-          echo "${{ secrets.GPG_KEY_B64 }}" | base64 -d | gpg --batch --import
+          echo "${{ secrets.GPG_KEY_B64 }}" | base64 -d | gpg --batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --import
           gpg --list-secret-keys
           # helm package --sign requires the legacy secring format
-          gpg --batch --export-secret-keys shubhamtatvamasi@gmail.com > ~/.gnupg/secring.gpg
+          gpg --batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --export-secret-keys shubhamtatvamasi@gmail.com > ~/.gnupg/secring.gpg
+          echo "${{ secrets.GPG_KEY_PASSPHRASE }}" > /tmp/gpg-passphrase
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
