@@ -23,10 +23,10 @@ jobs:
 
       - name: Import GPG key
         run: |
-          echo "${{ secrets.GPG_KEY_B64 }}" | base64 -d | gpg --batch --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --import
+          echo "${{ secrets.GPG_KEY_B64 }}" | base64 -d | gpg --batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --import
           gpg --list-secret-keys
-          # helm package --sign requires the legacy secring format
-          gpg --batch --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --export-secret-keys > ~/.gnupg/secring.gpg
+          # helm package --sign requires the legacy secring format; target key by email
+          gpg --batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --export-secret-keys shubhamtatvamasi@gmail.com > ~/.gnupg/secring.gpg
           # write passphrase file for cr
           echo "${{ secrets.GPG_KEY_PASSPHRASE }}" > /tmp/gpg-passphrase
 
