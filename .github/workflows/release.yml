@@ -25,7 +25,6 @@ jobs:
         run: |
           echo "${{ secrets.GPG_KEY_B64 }}" | base64 -d | gpg --batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --import
           gpg --list-secret-keys
-          # helm package --sign requires the legacy secring format
           gpg --batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --export-secret-keys shubhamtatvamasi@gmail.com > ~/.gnupg/secring.gpg
           echo "${{ secrets.GPG_KEY_PASSPHRASE }}" > /tmp/gpg-passphrase
 
@@ -42,11 +41,14 @@ jobs:
             --keyring ~/.gnupg/secring.gpg \
             --passphrase-file /tmp/gpg-passphrase
 
-      - name: Release charts
-        uses: helm/chart-releaser-action@v1.7.0
+      - name: Upload release packages
+        run: |
+          cr upload --config .cr.yaml --owner ShubhamTatvamasi --git-repo portainer-run --token "${{ secrets.GITHUB_TOKEN }}" --make-release-latest false
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        with:
-          config: .cr.yaml
-          skip_packaging: true
-          mark_as_latest: false
+
+      - name: Update chart index
+        run: |
+          cr index --config .cr.yaml --owner ShubhamTatvamasi --git-repo portainer-run --token "${{ secrets.GITHUB_TOKEN }}" --push --index-path .
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
