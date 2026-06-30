@@ -29,9 +29,19 @@ jobs:
           gpg --batch --pinentry-mode loopback --passphrase "${{ secrets.GPG_KEY_PASSPHRASE }}" --export-secret-keys shubhamtatvamasi@gmail.com > ~/.gnupg/secring.gpg
           echo "${{ secrets.GPG_KEY_PASSPHRASE }}" > /tmp/gpg-passphrase
 
-      - name: Run chart-releaser
+      - name: Install chart-releaser
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          install_only: true
+
+      - name: Package charts with signing
+        run: |
+          cr package charts/portainer-run --config .cr.yaml
+
+      - name: Release charts
         uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
           config: .cr.yaml
+          skip_packaging: true
