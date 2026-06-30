@@ -60,7 +60,7 @@ The following table lists configurable parameters and their defaults. The full v
 | - | - | - |
 | `replicaCount` | Number of replicas. Keep at 1 unless using `ReadWriteMany` storage. | `1` |
 | `image.repository` | Container image repository | `portainer/portainer-run` |
-| `image.tag` | Image tag | `latest` |
+| `image.tag` | Image tag | `""` (uses `appVersion`) |
 | `image.pullPolicy` | Image pull policy. Use `IfNotPresent` when pinning a specific tag. | `Always` |
 | `imagePullSecrets` | Pull secrets for private registries | `[]` |
 | `nameOverride` | Override the chart name | `""` |
