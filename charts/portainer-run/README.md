@@ -11,7 +11,7 @@ Deploy [Portainer-Run](https://portainer.ai) on Kubernetes using this Helm chart
 ## Install the chart repository
 
 ```bash
-helm repo add portainer https://portainer.github.io/k8s/
+helm repo add portainer-run https://shubhamtatvamasi.com/portainer-run
 helm repo update
 ```
 
@@ -26,13 +26,13 @@ kubectl create namespace portainer-run
 Install with defaults (connects to an in-cluster Portainer instance):
 
 ```bash
-helm upgrade -i portainer-run portainer/portainer-run -n portainer-run
+helm upgrade -i portainer-run portainer-run/portainer-run -n portainer-run
 ```
 
 Install pointing to an external Portainer instance with an Anthropic key:
 
 ```bash
-helm upgrade -i portainer-run portainer/portainer-run -n portainer-run \
+helm upgrade -i portainer-run portainer-run/portainer-run -n portainer-run \
   --set config.PORTAINER_URL=https://portainer.example.com:9443 \
   --set secret.anthropicApiKey=sk-ant-...
 ```
@@ -40,7 +40,7 @@ helm upgrade -i portainer-run portainer/portainer-run -n portainer-run \
 ## Testing the chart
 
 ```bash
-helm install --dry-run --debug portainer-run portainer/portainer-run -n portainer-run
+helm install --dry-run --debug portainer-run portainer-run/portainer-run -n portainer-run
 ```
 
 ## Deleting the chart
@@ -218,7 +218,7 @@ spec:
 EOF
 
 # 3. Install the chart
-helm upgrade -i portainer-run portainer/portainer-run -n portainer-run \
+helm upgrade -i portainer-run portainer-run/portainer-run -n portainer-run \
   --set ingress.enabled=true \
   --set ingress.ingressClassName=traefik \
   --set "ingress.hosts[0].host=portainer-run.example.com" \
